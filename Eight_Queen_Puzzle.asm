@@ -57,16 +57,145 @@ main:
 	#exit
 	li $v0,10
 	syscall
-#end Of Main 
+#END OF MAIN 
 
 StartGame:
-#end of StartGame
+#END OF STARTGAME
 
 PlaceQueen:
-#end of PlaceQueen
+#END OF PLACEQUEEN
 
+
+## It takes the position of any cell of board as argument[row,col] ##
+## Cell is passed in this method to check whether this cell would be safe [returns 1] to place queen or not [returns 0] ##
+## Safety of queen is ensured by checking this cell with the reference of previous placed queens ##
+## Registers Usage:
+##		s6,s7 -  run loops [temp reg]
+##		t8 -  run loops [temp reg]
+##		t9 - to store results [temp reg]
+##		s5 - to store values for comparisons [temp reg]
 Is_Safe:
-#end of Is_Safe
+	#save arguments for later use in all loops
+	move $s6,$a0 #row
+	move $s7, $a1 #col
+		
+	##Loop1_Col##	
+	li $t8,0 #r=0
+	Loop1_Col:	
+		#mem loc calculate for accessing 2D array board
+		#mem loc = SA + 4*(r*N + col)
+		mul $t9,$s0,$t8
+		add $t9,$t9,$s7
+		sll $t9,$t9,2
+		add $t9,$t9,$t0
+			
+		#load mem content
+		lw $t9,0($t9)
+		
+		li $s5,1 #save 1 to be compared by mem content
+		
+		#if board[r][col] == 1 then jump to return false #else continue the sequence of Loop1_Col
+		beq $t9,$s5,Return_False
+		
+		#r++
+		addi $t8,$t8,1
+		
+		#if r<N then restart Loop1_Col
+		slt $t9,$t8,$s0
+		bne $t9,$zero, Loop1_Col
+		
+		
+	##Loop2_Row##
+	li $t8,0 #c=0
+	
+	#this loop will start running after Loop1_Col termination and so on
+	Loop2_Row:
+		#mem loc = SA + 4*(row*N + c)
+		mul $t9,$s0,$s6
+		add $t9,$t9,$t8
+		sll $t9,$t9,2
+		add $t9,$t9,$t0
+			
+		#load mem content
+		lw $t9,0($t9)
+		
+		li $s5,1 #save 1 to be compared by mem content
+		
+		#if board[row][c] == 1 then jump to return false #else continue the sequence of Loop2_Row
+		beq $t9,$s5,Return_False
+		
+		#c++
+		addi $t8,$t8,1
+		
+		#if c<N then restart Loop2_Row
+		slt $t9,$t8,$s0
+		bne $t9,$zero, Loop2_Row
+
+		
+	##Loop3_D_Up##	
+	move $s6,$a0 #r		#Initialize r and c from argument registers
+	move $s7, $a1 #c
+	
+	Loop3_D_Up:
+		#mem loc = SA + 4*(r*N + c)
+		mul $t9,$s0,$s6
+		add $t9,$t9,$s7
+		sll $t9,$t9,2
+		add $t9,$t9,$t0
+		
+		#load mem content
+		lw $t9,0($t9)
+		
+		li $s5,1 #save 1 to be compared by mem content
+		
+		#if board[row][c] == 1 then jump to return false #else continue the sequence of Loop3_D_Up
+		beq $t9,$s5,Return_False
+		
+		addi $s6,$s6,-1 #r--
+		addi $s7,$s7,-1 #c--
+				
+		li $t9,-1 #save -1 to compare
+		
+		#if -1< r then restart Loop3_D_Up
+		slt $t9,$t9,$s6
+		bne $t9,$zero,Loop3_D_Up
+		
+		
+	##Loop4_D_Down##
+	move $s6,$a0 #r		#Initialize r and c from argument registers
+	move $s7, $a1 #c
+	
+	Loop4_D_Down:
+		#mem loc = SA + 4*(r*N + c)
+		mul $t9,$s0,$s6
+		add $t9,$t9,$s7
+		sll $t9,$t9,2
+		add $t9,$t9,$t0
+		
+		#load mem content
+		lw $t9,0($t9)
+		
+		li $s5,1 #save 1 to be compared by mem content
+		
+		#if board[row][c] == 1 then jump to return false #else continue the sequence of Loop4_D_Down
+		beq $t9,$s5,Return_False
+		
+		addi $s6,$s6,1 #r++
+		addi $s7,$s7,-1 #c--
+				
+		#if r<N then restart Loop4_D_Down
+		slt $t9,$s6,$s0
+		bne $t9,$zero,Loop4_D_Down
+	
+	
+	#if all loops have been ran without jumping to Return_False then return true
+	li $v0,1
+	jr $ra
+	
+	Return_False:
+		li $v0,0
+		jr $ra
+#END OF IS_SAFE
 
 
 ## This to print the Queens position on board ##
@@ -79,11 +208,12 @@ Is_Safe:
 PrintBoard:
 	li $t8,0	#i=0
 	
-	Loop1:
+	Loop1_i:
 		li $t9,0	#j=0
 		
-		Loop2:
+		Loop2_j:
 			#mem loc calculate for accessing 2D array board
+			#mem loc = SA + 4*(i*N + j)
 			mul $s7,$s0,$t8
 			add $s7,$s7,$t9
 			sll $s7,$s7,2
@@ -107,7 +237,7 @@ PrintBoard:
 			
 			#if j>=N then terminate loop1
 			slt $s7,$t9,$s0	 
-			bne $s7,$zero,Loop2
+			bne $s7,$zero,Loop2_j
 		
 		#NewLine
 		li $v0,4  
@@ -120,7 +250,7 @@ PrintBoard:
 			
 		#if i>=N then terminate loop1
 		slt $s7,$t8,$s0	 
-		bne $s7,$zero,Loop1
+		bne $s7,$zero,Loop1_i
 		
 	jr $ra
-##end Of PrintBoard##
+##END OF PRINTBOARD##

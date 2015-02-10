@@ -51,26 +51,21 @@ bool Is_Safe(int row, int col)
 			return false;
 		}
 	}
-	//check diagonal
-	int r = row;
-	int c = col;
-	//check up of the list //			
-	while (r >= 0)
+	//check up diagonally '\'			
+	for (int r = row, c=col; r >-1; r--,c--)
 	{
-		if (board[r--][c--] == 1)
+		if (board[r][c] == 1)
 		{
 			return false;
-		}
+		} 
 	}
-	//check diagonal up to the list //
-	r = row;
-	c = col;
-	while (r <= N - 1)
+	//check down diagonally '/'
+	for (int r = row, c=col; r < N; r++,c--)
 	{
-		if (board[r++][c--] == 1)
+		if (board[r][c] == 1)
 		{
 			return false;
-		}
+		} 
 	}
 	return true;
 }
@@ -82,7 +77,8 @@ bool PlaceQueen(int r, int col) //returns true if queen is placed safely	//r dif
 		if (Is_Safe(row, col))
 		{
 			queens_RowNo[queens_Placed] = row;
-			queens_ColNo[queens_Placed++] = col;
+			queens_ColNo[queens_Placed] = col;
+			queens_Placed++;
 
 			board[row][col] = 1;
 
