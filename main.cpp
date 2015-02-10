@@ -120,8 +120,6 @@ void StartGame()
 			}
 		}
 	}
-	PrintBoard();
-	cout << "TADA! xD   \nAll Queens Placed!" << endl;
 }
 
 int main()
@@ -137,4 +135,7 @@ int main()
 
 	//Run Game to solve puzzle
 	StartGame();
+	
+	PrintBoard();
+	cout << "TADA! xD   \nAll Queens Placed!" << endl;
 }
