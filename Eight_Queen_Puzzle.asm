@@ -63,6 +63,79 @@ StartGame:
 #END OF STARTGAME
 
 PlaceQueen:
+
+#saving arguments 
+	move $s4,$a0 #r
+	move $s7, $a1 #col
+	
+	##Loop1##
+	move $t8,$s4 #row=r
+	move $a0,$t8
+
+	move $a1,$s7
+	
+	Loop1:
+	
+	#queens_RowNo[queens_Placed] = row
+	
+	la $s3,queens_RowNo #$t1=queens_rowno
+	mul $t0,$s1,4 #queens_placed * 4
+	add $t0,$t0,$s3 #adding for next offset
+
+	sw $t8,($t0) #$t8=row
+	
+	
+	
+	
+	#queens_ColNo[queens_Placed] = col;
+	
+	la $s4,queens_ColNo #$t2=queens_colno
+	mul $t0,$s1,4 #queens_placed * 4
+	add $t0,$t0,$s4 #adding for next offset
+	
+	sw $s7,($t0) #$s7=col
+
+	
+	
+	#queens_Placed++
+		addi $s1,$s1,1
+		
+	#board[row][col] = 1; //1 for queen 
+
+		#mem loc calculate for accessing 2D array board
+		#mem loc = SA + 4*(row*N + col)
+       mul $t9,$t8,$s0
+		add $t9,$t9,$s7
+		sll $t9,$t9,2
+		add $t9,$t9,$t0 #adding board
+		
+li $s5,1 #save 1 to be compared by mem content
+		#load mem content
+		
+		sw $s5,0($t9)
+
+	
+	beq $t9,$s5,Return_True
+
+
+
+	#row++
+		addi $t8,$t8,1
+#if row<N then restart Loop1
+		slt $t9,$t8,$s0
+		bne $t9,$zero,Loop1
+		
+#if all loops have been ran without jumping to Return_True then return false
+
+		li $v0,0
+	    jr $ra
+
+
+	Return_True:
+		li $v0,1
+		jr $ra
+
+
 #END OF PLACEQUEEN
 
 
