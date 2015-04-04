@@ -60,6 +60,78 @@ main:
 #END OF MAIN 
 
 StartGame:
+	
+	
+	li $s4, 0  			   	     #  col=0
+	li $s2, 0				     # row = 0
+	li $t8, 1	                 # dummy value
+	li $t9, 2					 # dummy value
+	li $s5, 0					 # PlaceQueen = 0 (false)
+
+#   $t8	  save s6 in t8                 
+#	$s6 r
+#	$s7 c
+#   $t6  false comparation with s5
+#   $t7 save board =0
+#  $t1 - queens_RowNo [1D Array]
+#	$t2 - queens_ColNo [1D Array]
+##	$t3
+	
+	
+
+loop1:
+		beq $s4, $s0, next1        # if t1 == 8 we are done
+		li $s2, 0 				   # row = 0
+		
+		addi $s3, $s4, 1		   #col = col + 1 store col in s3 for compare
+			
+		
+        loop2:
+			beq $s1, $s3, loop1				   #while (queens_Placed != col + 1)
+			
+			li $t6, 0
+			bne $s5, $t6, next3	               #if (PlaceQueen(row, col) == false)
+			addi $s1, $s1, -1                  #queens_Placed--;
+			
+			la $t1, queens_RowNo		       #queens_RowNo[queens_Placed] 
+			sll $s1,$s1,2
+			add $s1,$s1,$t1                                
+			lw $s1, 0($s1)
+			move  $s6,$s1
+			
+			
+			
+			la $t2, queens_ColNo               #queens_ColNo[queens_Placed]
+			sll $s1,$s1,2
+			add $s1,$s1,$t2
+			lw $s1, 0($s1)
+		    move $s7,$s1			
+			
+			
+			
+			
+			#mem loc = SA + 4*(r*N + c)        #board[r][c] 
+			mul $t3,$s0,$s6
+			add $t3,$t3,$s7
+			sll $t3,$t3,2
+			add $t3,$t3,$t0
+		
+			#load mem content
+			lw $t3,0($t3)
+			add $t7,$t3,0           		  #board[r][c] = 0
+			
+			
+			addi $s4, $s4, -1 				  #col--;
+			addi $t8,$s6,1    				  #queens_RowNo[queens_Placed] + 1
+			move $s2,$t8      				  #row = queens_RowNo[queens_Placed] + 1
+			
+			next3:
+				li $s2,0
+				j loop2
+		
+		
+	addi $s4, $s4, 1                          # add 1 to col
+	j loop1
 #END OF STARTGAME
 
 PlaceQueen:	
