@@ -47,7 +47,7 @@ main:
 	li $s1,0 #queens_Placed=0
 	la $t0, board #$t0=address of board
 	
-	jal PrintBoard #Methos call
+	jal PrintBoard #Method call
 	
 	#print greeting ^^
 	li $v0,4
@@ -62,80 +62,63 @@ main:
 StartGame:
 #END OF STARTGAME
 
-PlaceQueen:
-
-#saving arguments 
-	move $s4,$a0 #r
-	move $s7, $a1 #col
+PlaceQueen:	
+	move $s4,$a0 #r 	#saving arguments 
+	move $s5, $a1 #col	
 	
+	move $s6, $ra #store return address
+	
+	li $s7, 1 #store '1' for comparison
+	
+	move $t8,$s4 #row=r	
 	##Loop1##
-	move $t8,$s4 #row=r
-	move $a0,$t8
-
-	move $a1,$s7
 	
 	Loop1:
+		move $a0,$t8
+		move $a1,$s5	
+		jal Is_Safe
 	
-	#queens_RowNo[queens_Placed] = row
-	
-	la $s3,queens_RowNo #$t1=queens_rowno
-	mul $t0,$s1,4 #queens_placed * 4
-	add $t0,$t0,$s3 #adding for next offset
-
-	sw $t8,($t0) #$t8=row
-	
-	
-	
-	
-	#queens_ColNo[queens_Placed] = col;
-	
-	la $s4,queens_ColNo #$t2=queens_colno
-	mul $t0,$s1,4 #queens_placed * 4
-	add $t0,$t0,$s4 #adding for next offset
-	
-	sw $s7,($t0) #$s7=col
-
-	
-	
-	#queens_Placed++
-		addi $s1,$s1,1
+		bne $v0, $s7, JUMP_IF_FALSE #if return num is not = 1 terminate sequencial execution
 		
-	#board[row][col] = 1; //1 for queen 
+		#queens_RowNo[queens_Placed] = row		
+		la $t1, queens_RowNo  #$t1=queens_rowno
+		muli $t9,$s1,4 	#4(i)
+		add $t9,$t1,$t9  #SA + 4(i)
 
-		#mem loc calculate for accessing 2D array board
+		sw $t8,0($t9) 
+		
+		
+		#queens_ColNo[queens_Placed] = col;	
+		la $t2,queens_ColNo #$t2=queens_colno
+		muli $t9,$s1,4 	#4(i)
+		add $t9,$t2,$t9  #SA + 4(i)
+		
+		sw $s5,0($t9) 	
+		
+		addi $s1,$s1,1 #queens_Placed++
+			
+		#board[row][col] = 1; //1 for queen 
+
 		#mem loc = SA + 4*(row*N + col)
-       mul $t9,$t8,$s0
-		add $t9,$t9,$s7
+		mul $t9,$t8,$s0			
+		add $t9,$t9,$s5
 		sll $t9,$t9,2
-		add $t9,$t9,$t0 #adding board
-		
-li $s5,1 #save 1 to be compared by mem content
-		#load mem content
-		
-		sw $s5,0($t9)
+		add $t9,$t9,$t0 
+			
+		sw $s7,0($t9) #store 1 
 
-	
-	beq $t9,$s5,Return_True
-
-
-
-	#row++
-		addi $t8,$t8,1
-#if row<N then restart Loop1
-		slt $t9,$t8,$s0
-		bne $t9,$zero,Loop1
-		
-#if all loops have been ran without jumping to Return_True then return false
-
-		li $v0,0
-	    jr $ra
-
-
-	Return_True:
 		li $v0,1
 		jr $ra
 
-
+		JUMP_IF_FALSE:
+			#row++
+			addi $t8,$t8,1
+			slt $t9,$t8,$s0  #if row<N then restart Loop1
+			bne $t9,$zero,Loop1
+		
+	#if all loops have been ran without jumping to Return_True then return false
+	li $v0,0
+	jr $ra
 #END OF PLACEQUEEN
 
 
