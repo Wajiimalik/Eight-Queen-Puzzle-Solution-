@@ -72,6 +72,8 @@ bool Is_Safe(int row, int col)
 
 bool PlaceQueen(int r, int col) //returns true if queen is placed safely	//r diff passes and col fixed
 {
+	if(r == N) { return false;}
+	
 	for (int row = r; row < N; row++)
 	{
 		if (Is_Safe(row, col))

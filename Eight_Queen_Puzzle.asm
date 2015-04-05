@@ -44,7 +44,7 @@ greeting: .asciiz "TADA! xD   \nAll Queens Placed!"
 
 main:
 	li $s0, 8 #N = 8
-	li $s1,0 #queens_Placed = 0
+	li $s1, 0 #queens_Placed = 0
 	la $t0, board #$t0 = address of board
 	la $t1, queens_RowNo  #$t1 = queens_rowno
 	la $t2, queens_ColNo  #$t2 = queens_ColNo
@@ -67,12 +67,12 @@ main:
 StartGame:
 	move $t3, $ra #storing RA as 2 more functions will be called 
 	
-	li $t5, 0 #  col=0
+	li $t5,0 #  col=0
 	FOR_LOOP:
 		li $t6,0 # row = 0
 			
 		WHILE_LOOP:
-			addi $t7,$t5,1 # t7 = "col + 1" for compare
+			addi $t7,$t5,1 #t7 = "col + 1" for compare
 			beq $s1,$t7,EXIT_WHILE_LOOP  #while (queens_Placed != col + 1)
 				
 			move $a0, $t6
@@ -99,7 +99,7 @@ StartGame:
 				#load mem content
 				sw $zero,0($t9) #board[r][c] = 0
 				
-				addi $t5, $t5, -1  #col--;
+				addi $t5,$t5,-1  #col--;
 				addi $t6,$s5,1   #row = r + 1
 				
 				j WHILE_LOOP
@@ -125,6 +125,8 @@ PlaceQueen:
 	move $s3,$a1 #col	
 	move $s4,$ra #store return address
 	li $a3,1 #store '1' for comparison
+	
+	beq $s2, $s0, RETURN_FALSE
 	
 	move $t4,$s2 #row=r	
 	##Loop##
@@ -164,7 +166,7 @@ PlaceQueen:
 			slt $t9,$t4,$s0  #if row<N then restart Loop1
 			bne $t9,$zero,Loop
 		
-	#if all loops have been ran without jumping to Return_True then return false
+	RETURN_FALSE:   #if all loops have been ran without jumping to Return_True then return false	
 	li $v0,0
 	move $ra, $s4
 	jr $ra
