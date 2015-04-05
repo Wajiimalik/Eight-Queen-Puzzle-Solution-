@@ -43,11 +43,14 @@ greeting: .asciiz "TADA! xD   \nAll Queens Placed!"
 .text
 
 main:
-	li $s0, 8 #N=8
-	li $s1,0 #queens_Placed=0
-	la $t0, board #$t0=address of board
+	li $s0, 8 #N = 8
+	li $s1,0 #queens_Placed = 0
+	la $t0, board #$t0 = address of board
+	la $t1, queens_RowNo  #$t1 = queens_rowno
+	la $t2, queens_ColNo  #$t2 = queens_ColNo
 	
-	jal PrintBoard #Method call
+	jal StartGame
+	jal PrintBoard 
 	
 	#print greeting ^^
 	li $v0,4
@@ -59,137 +62,111 @@ main:
 	syscall
 #END OF MAIN 
 
+
+
 StartGame:
+	move $t3, $ra #storing RA as 2 more functions will be called 
 	
+	li $t5, 0 #  col=0
+	FOR_LOOP:
+		li $t6,0 # row = 0
+			
+		WHILE_LOOP:
+			addi $t7,$t5,1 # t7 = "col + 1" for compare
+			beq $s1,$t7,EXIT_WHILE_LOOP  #while (queens_Placed != col + 1)
+				
+			move $a0, $t6
+			move $a1, $t5
+			jal PlaceQueen
+				
+			bne $v0, $zero, LOOP_IF_TRUE
+				addi $s1,$s1,-1    #queens_Placed--;
+				
+				sll $t9,$s1,2 #r = s5
+				add $t9, $t1, $t9                              
+				lw $s5,0($t9)
+				
+				sll $t9,$s1,2 #c = s6
+				add $t9,$t2,$t9
+				lw $s6,0($t9)
+				
+				#mem loc = SA + 4*(r*N + c) #board[r][c] 
+				mul $t9,$s0,$s5
+				add $t9,$t9,$s6
+				sll $t9,$t9,2
+				add $t9,$t9,$t0
+			
+				#load mem content
+				sw $zero,0($t9) #board[r][c] = 0
+				
+				addi $t5, $t5, -1  #col--;
+				addi $t6,$s5,1   #row = r + 1
+				
+				j WHILE_LOOP
+				
+			LOOP_IF_TRUE: 
+				li $t6, 0 #row = 0
+				j WHILE_LOOP
+				
+		EXIT_WHILE_LOOP:
+			addi $t5,$t5,1 # add 1 to col
+			slt $t9,$t5,$s0 #if col < N then restart for_loop
+			bne $t9,$zero,FOR_LOOP
 	
-	li $s4, 0  			   	     #  col=0
-	li $s2, 0				     # row = 0
-	li $t8, 1	                 # dummy value
-	li $t9, 2					 # dummy value
-	li $s5, 0					 # PlaceQueen = 0 (false)
-
-#   $t8	  save s6 in t8                 
-#	$s6 r
-#	$s7 c
-#   $t6  false comparation with s5
-#   $t7 save board =0
-#  $t1 - queens_RowNo [1D Array]
-#	$t2 - queens_ColNo [1D Array]
-##	$t3
-	
-	
-
-loop1:
-		beq $s4, $s0, next1        # if t1 == 8 we are done
-		li $s2, 0 				   # row = 0
-		
-		addi $s3, $s4, 1		   #col = col + 1 store col in s3 for compare
-			
-		
-        loop2:
-			beq $s1, $s3, loop1				   #while (queens_Placed != col + 1)
-			
-			li $t6, 0
-			bne $s5, $t6, next3	               #if (PlaceQueen(row, col) == false)
-			addi $s1, $s1, -1                  #queens_Placed--;
-			
-			la $t1, queens_RowNo		       #queens_RowNo[queens_Placed] 
-			sll $s1,$s1,2
-			add $s1,$s1,$t1                                
-			lw $s1, 0($s1)
-			move  $s6,$s1
-			
-			
-			
-			la $t2, queens_ColNo               #queens_ColNo[queens_Placed]
-			sll $s1,$s1,2
-			add $s1,$s1,$t2
-			lw $s1, 0($s1)
-		    move $s7,$s1			
-			
-			
-			
-			
-			#mem loc = SA + 4*(r*N + c)        #board[r][c] 
-			mul $t3,$s0,$s6
-			add $t3,$t3,$s7
-			sll $t3,$t3,2
-			add $t3,$t3,$t0
-		
-			#load mem content
-			lw $t3,0($t3)
-			add $t7,$t3,0           		  #board[r][c] = 0
-			
-			
-			addi $s4, $s4, -1 				  #col--;
-			addi $t8,$s6,1    				  #queens_RowNo[queens_Placed] + 1
-			move $s2,$t8      				  #row = queens_RowNo[queens_Placed] + 1
-			
-			next3:
-				li $s2,0
-				j loop2
-		
-		
-	addi $s4, $s4, 1                          # add 1 to col
-	j loop1
+	move $ra, $t3
+	jr $ra
 #END OF STARTGAME
 
+
+
+
 PlaceQueen:	
-	move $s4,$a0 #r 	#saving arguments 
-	move $s5, $a1 #col	
+	move $s2,$a0 #r 	#saving arguments 
+	move $s3,$a1 #col	
+	move $s4,$ra #store return address
+	li $a3,1 #store '1' for comparison
 	
-	move $s6, $ra #store return address
+	move $t4,$s2 #row=r	
+	##Loop##
 	
-	li $s7, 1 #store '1' for comparison
-	
-	move $t8,$s4 #row=r	
-	##Loop1##
-	
-	Loop1:
-		move $a0,$t8
-		move $a1,$s5	
+	Loop:
+		move $a0,$t4
+		move $a1,$s3	
 		jal Is_Safe
 	
-		bne $v0, $s7, JUMP_IF_FALSE #if return num is not = 1 terminate sequencial execution
+		bne $v0, $a3, JUMP_IF_FALSE #if return num is not = 1 terminate sequencial execution
+			#queens_RowNo[queens_Placed] = row		
+			sll $t9,$s1,2 	#4(i)
+			add $t9,$t1,$t9  #SA + 4(i)
+			sw $t4,0($t9) 
 		
-		#queens_RowNo[queens_Placed] = row		
-		la $t1, queens_RowNo  #$t1=queens_rowno
-		muli $t9,$s1,4 	#4(i)
-		add $t9,$t1,$t9  #SA + 4(i)
+			#queens_ColNo[queens_Placed] = col;	
+			sll $t9,$s1,2 	#4(i)
+			add $t9,$t2,$t9  #SA + 4(i)
+			sw $s3,0($t9) 	
+		
+			addi $s1,$s1,1 #queens_Placed++`1 
 
-		sw $t8,0($t9) 
-		
-		
-		#queens_ColNo[queens_Placed] = col;	
-		la $t2,queens_ColNo #$t2=queens_colno
-		muli $t9,$s1,4 	#4(i)
-		add $t9,$t2,$t9  #SA + 4(i)
-		
-		sw $s5,0($t9) 	
-		
-		addi $s1,$s1,1 #queens_Placed++
+			#mem loc = SA + 4*(row*N + col)
+			mul $t9,$t4,$s0			
+			add $t9,$t9,$s3
+			sll $t9,$t9,2
+			add $t9,$t9,$t0 
 			
-		#board[row][col] = 1; //1 for queen 
+			sw $a3,0($t9) #store 1 
 
-		#mem loc = SA + 4*(row*N + col)
-		mul $t9,$t8,$s0			
-		add $t9,$t9,$s5
-		sll $t9,$t9,2
-		add $t9,$t9,$t0 
-			
-		sw $s7,0($t9) #store 1 
-
-		li $v0,1
-		jr $ra
+			li $v0,1
+			move $ra, $s4
+			jr $ra
 
 		JUMP_IF_FALSE:
-			#row++
-			addi $t8,$t8,1
-			slt $t9,$t8,$s0  #if row<N then restart Loop1
-			bne $t9,$zero,Loop1
+			addi $t4,$t4,1 #row++
+			slt $t9,$t4,$s0  #if row<N then restart Loop1
+			bne $t9,$zero,Loop
 		
 	#if all loops have been ran without jumping to Return_True then return false
 	li $v0,0
+	move $ra, $s4
 	jr $ra
 #END OF PLACEQUEEN
 
