@@ -1,7 +1,7 @@
 // Sheema Masood (CS-012) 
 // Wajiha Muzaffar Ali (CS-013)
 // Aleesha Kanwal (CS-017)
-// Date:  08/02/2015
+// Date:  06/04/2015
 // main.cpp (Written in C language to be converted in MIPS Assembly Language) 
 // Description of Project:
 // 		8 Queen Puzzle is the problem of placing 8 queens on an 8x8 chess board [N queens on NxN board; N=8]

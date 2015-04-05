@@ -1,47 +1,47 @@
 ## Sheema Masood (CS-012) 
 ## Wajiha Muzaffar Ali (CS-013)
 ## Aleesha Kanwal (CS-017)
-## Date:  --/--/2015
+## Date:  06/04/2015
 ## Eight_Queen_Puzzle.asm 
 ## Description of Project:
 ## 		8 Queen Puzzle is the problem of placing 8 queens on an 8x8 chess board [N queens on NxN board; N=8]
 ## 		so that no queens can attack each other.
 ## 		Thus, it is necessary that no queens share same row, column and diagonal.
 
-## main --
-
 ## Register usage:
-##		$s0 - N
-##		$s1 - queens_Placed
+##		$s0 - N   
+##		$s1 - queens_Placed   ;how much queens are placed yet
 ##		$t0 - board [2D Array]
 ##		$t1 - queens_RowNo [1D Array]
 ##		$t2 - queens_ColNo [1D Array]
 ##
 ## Arrays description:
 ##		board - tells the final position on queens [1: present, 0:absent]
-##		queens_RowNo -  
-##		queens_ColNo -
+##		queens_RowNo - index number tells the queen number and value at this index tells in which row it is placed on board
+##		queens_ColNo - index number tells the queen number and value at this index tells in which col it is placed on board
 
 
 .data
-board: .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   .word 0:8
-	   
-queens_RowNo: .word -1:8 
-queens_ColNo: .word -1:8 
+	board: .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   .word 0:8
+		   
+	queens_RowNo: .word -1:8 
+	queens_ColNo: .word -1:8 
 
-newline: .asciiz "\n"
-tab: .asciiz "\t"
-greeting: .asciiz "TADA! xD   \nAll Queens Placed!"
+	newline: .asciiz "\n"
+	tab: .asciiz "\t"
+	greeting: .asciiz "TADA! xD   \nAll Queens Placed!"
 
 .text
-
+## main -- initializes all necessary registers with values and addresses
+## call 2 mehtods, 1 for solving puzzle and other to print board ##
+## in the end prints greeting and terminates/exit the program ##
 main:
 	li $s0, 8 #N = 8
 	li $s1, 0 #queens_Placed = 0
@@ -64,6 +64,19 @@ main:
 
 
 
+## This method starts to solve the puzzle ##
+## It runs loop for columns and one loop for rows ## 
+## Column number cannot be increamented untill there is one queen in current column ##
+## If during searching for safe place it is found that there is no safe row for queen in current col then ##
+## then it decreaments in column number and remove queen from that previous column ##
+## and finds a new safe row for queen starting from the next row it was placed in that previous col ##
+## If column number suffers increament then row number is start from 0 ##
+## Registers Usage:
+##		t3 - store return address
+##		t5, t6 - runs loops
+##  	t7 - stores "col + 1" values for each iteration
+## 		t9 - stores temp values
+##		s5, s6 - r, c (loads row # and col # from 1D arrays)
 StartGame:
 	move $t3, $ra #storing RA as 2 more functions will be called 
 	
@@ -119,7 +132,15 @@ StartGame:
 
 
 
-
+## It takes the position of start of row for any specific col on board as argument[r,col] ##
+## If IsSafe method returns true indicating that queen is safe at this particular position ##
+## then it actually places queen at that safe position by updating chess board array and then return true ##
+## If all rows are finished i.e. reached to the limit (7) and no queen is placed till that point then it returns False ##
+## Registers Usage:
+##		s2,s3, s4 -  save arguments and return address
+##		a3 -  store '1' for comparison
+##		t4 - run loop
+## 		t9 - store temp values
 PlaceQueen:	
 	move $s2,$a0 #r 	#saving arguments 
 	move $s3,$a1 #col	
@@ -129,9 +150,9 @@ PlaceQueen:
 	beq $s2, $s0, RETURN_FALSE
 	
 	move $t4,$s2 #row=r	
-	##Loop##
+	##LOOP##
 	
-	Loop:
+	LOOP:
 		move $a0,$t4
 		move $a1,$s3	
 		jal Is_Safe
@@ -164,13 +185,14 @@ PlaceQueen:
 		JUMP_IF_FALSE:
 			addi $t4,$t4,1 #row++
 			slt $t9,$t4,$s0  #if row<N then restart Loop1
-			bne $t9,$zero,Loop
+			bne $t9,$zero,LOOP
 		
 	RETURN_FALSE:   #if all loops have been ran without jumping to Return_True then return false	
 	li $v0,0
 	move $ra, $s4
 	jr $ra
 #END OF PLACEQUEEN
+
 
 
 ## It takes the position of any cell of board as argument[row,col] ##
@@ -303,6 +325,7 @@ Is_Safe:
 		li $v0,0
 		jr $ra
 #END OF IS_SAFE
+
 
 
 ## This to print the Queens position on board ##
