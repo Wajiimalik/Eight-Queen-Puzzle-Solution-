@@ -10,13 +10,13 @@
 
 ## Register usage:
 ##		$s0 - N   
-##		$s1 - queens_Placed   ;how much queens are placed yet
+##		$s1 - queens_Placed   ; how much queens are placed yet
 ##		$t0 - board [2D Array]
 ##		$t1 - queens_RowNo [1D Array]
 ##		$t2 - queens_ColNo [1D Array]
 ##
 ## Arrays description:
-##		board - tells the final position on queens [1: present, 0:absent]
+##		board - tells the final position on queens [1: present, 0: absent]
 ##		queens_RowNo - index number tells the queen number and value at this index tells in which row it is placed on board
 ##		queens_ColNo - index number tells the queen number and value at this index tells in which col it is placed on board
 
@@ -40,7 +40,7 @@
 
 .text
 ## main -- initializes all necessary registers with values and addresses
-## call 2 mehtods, 1 for solving puzzle and other to print board ##
+## call 2 methods, 1 for solving puzzle and other to print board ##
 ## in the end prints greeting and terminates/exit the program ##
 main:
 	li $s0, 8 #N = 8
@@ -66,11 +66,11 @@ main:
 
 ## This method starts to solve the puzzle ##
 ## It runs loop for columns and one loop for rows ## 
-## Column number cannot be increamented untill there is one queen in current column ##
+## Column number cannot be incremented until there is one queen in current column ##
 ## If during searching for safe place it is found that there is no safe row for queen in current col then ##
-## then it decreaments in column number and remove queen from that previous column ##
+## then it decrements in column number and remove queen from that previous column ##
 ## and finds a new safe row for queen starting from the next row it was placed in that previous col ##
-## If column number suffers increament then row number is start from 0 ##
+## If column number suffers increment then row number is start from 0 ##
 ## Registers Usage:
 ##		t3 - store return address
 ##		t5, t6 - runs loops
@@ -157,7 +157,7 @@ PlaceQueen:
 		move $a1,$s3	
 		jal Is_Safe
 	
-		bne $v0, $a3, JUMP_IF_FALSE #if return num is not = 1 terminate sequencial execution
+		bne $v0, $a3, JUMP_IF_FALSE #if return num is not = 1 terminate sequential execution
 			#queens_RowNo[queens_Placed] = row		
 			sll $t9,$s1,2 	#4(i)
 			add $t9,$t1,$t9  #SA + 4(i)

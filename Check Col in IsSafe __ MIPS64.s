@@ -40,7 +40,7 @@ main:
 		ld r5,0(r5)
 		beq r5,r6,RETURN_FALSE
 		
-		; run loop (increament r and check if r<N then restart loop)
+		; run loop (increment r and check if r<N then restart loop)
 		daddi r1,r1,1
 		slt r4,r1,r10
 		bne r4,r0,LOOP
